@@ -1,219 +1,128 @@
-// Package utils
 package utils
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"utilodactyl/models"
 	"sort"
+	"utilodactyl/models"
 )
 
-const BooksFile = "books.json"
-const ProjectsFile = "projects.json"
-const GamesFile = "games.json"
+const (
+	booksFile    = "books.json"
+	projectsFile = "projects.json"
+	gamesFile    = "games.json"
+)
 
-func LoadBooks() ([]models.Book, error) {
-	data, err := os.ReadFile(BooksFile)
+func readJSONFile[T any](path string) ([]T, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return []models.Book{}, nil
+			return []T{}, nil
 		}
-
-		return nil, fmt.Errorf("failed to read %s: %w", BooksFile, err)
+		return nil, fmt.Errorf("failed to read %s: %w", path, err)
 	}
 
-	var books []models.Book
-	if err = json.Unmarshal(data, &books); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %w", BooksFile, err)
+	var result []T
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal %s: %w", path, err)
 	}
+	return result, nil
+}
 
-	return books, nil
+func writeJSONFile[T any](path string, items []T) error {
+	data, err := json.MarshalIndent(items, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to write %s: %w", path, err)
+	}
+	return nil
+}
+
+func LoadBooks() ([]models.Book, error) {
+	return readJSONFile[models.Book](booksFile)
 }
 
 func LoadGames() ([]models.Game, error) {
-	data, err := os.ReadFile(GamesFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return []models.Game{}, nil
-		}
-
-		return nil, fmt.Errorf("failed to read %s: %w", BooksFile, err)
-	}
-
-	var games []models.Game
-	if err = json.Unmarshal(data, &games); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %w", BooksFile, err)
-	}
-
-	return games, nil
+	return readJSONFile[models.Game](gamesFile)
 }
 
 func LoadProjects() ([]models.Project, error) {
-	data, err := os.ReadFile(ProjectsFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return []models.Project{}, nil
-		}
-
-		return nil, fmt.Errorf("failed to read %s: %w", ProjectsFile, err)
-	}
-
-	var projects []models.Project
-	if err = json.Unmarshal(data, &projects); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %w", ProjectsFile, err)
-	}
-
-	return projects, nil
-}
-
-func SaveGames(games []models.Game) error {
-	data, err := json.MarshalIndent(games, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal games: %w", err)
-	}
-
-	if err = os.WriteFile(GamesFile, data, 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", GamesFile, err)
-	}
-
-	return nil
+	return readJSONFile[models.Project](projectsFile)
 }
 
 func SaveBooks(books []models.Book) error {
-	data, err := json.MarshalIndent(books, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal books: %w", err)
-	}
+	return writeJSONFile(booksFile, books)
+}
 
-	if err = os.WriteFile(BooksFile, data, 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", BooksFile, err)
-	}
-
-	return nil
+func SaveGames(games []models.Game) error {
+	return writeJSONFile(gamesFile, games)
 }
 
 func SaveProjects(projects []models.Project) error {
-	data, err := json.MarshalIndent(projects, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal projects: %w", err)
-	}
-
-	if err = os.WriteFile(ProjectsFile, data, 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", ProjectsFile, err)
-	}
-
-	return nil
+	return writeJSONFile(projectsFile, projects)
 }
 
-func GenerateGameID() (uint32, error) {
-	games, err := LoadGames()
+func generateNextID[T any](loadFunc func() ([]T, error), getID func(T) uint32) (uint32, error) {
+	items, err := loadFunc()
 	if err != nil {
-		return 0, fmt.Errorf("failed to load games: %w", err)
+		return 0, err
 	}
 
-	maxID := uint32(0)
-	for _, game := range games {
-		if game.ID > maxID {
-			maxID = game.ID
+	var maxID uint32
+	for i := range items {
+		if id := getID(items[i]); id > maxID {
+			maxID = id
 		}
 	}
-
 	return maxID + 1, nil
 }
 
 func GenerateBookID() (uint32, error) {
-	books, err := LoadBooks()
-	if err != nil {
-		return 0, fmt.Errorf("failed to load books: %w", err)
-	}
-
-	maxID := uint32(0)
-	for _, book := range books {
-		if book.ID > maxID {
-			maxID = book.ID
-		}
-	}
-
-	return maxID + 1, nil
+	return generateNextID(LoadBooks, func(b models.Book) uint32 { return b.ID })
 }
 
+func GenerateGameID() (uint32, error) {
+	return generateNextID(LoadGames, func(g models.Game) uint32 { return g.ID })
+}
+
+// Common tag/genre collector
+func collectUniqueStrings[T any](items []T, extract func(T) []string) []string {
+	unique := make(map[string]struct{})
+	for _, item := range items {
+		for _, s := range extract(item) {
+			unique[s] = struct{}{}
+		}
+	}
+	result := make([]string, 0, len(unique))
+	for s := range unique {
+		result = append(result, s)
+	}
+	sort.Strings(result)
+	return result
+}
+
+// Book
 func CollectUniqueBookTags(books []models.Book) []string {
-	tagSet := make(map[string]struct{})
-	for _, book := range books {
-		for _, tag := range book.Tags {
-			tagSet[tag] = struct{}{}
-		}
-	}
-
-	tags := make([]string, 0, len(tagSet))
-	for tag := range tagSet {
-		tags = append(tags, tag)
-	}
-	sort.Strings(tags)
-	return tags
-}
-
-func CollectUniqueProjectTags(projects []models.Project) []string {
-	tagSet := make(map[string]struct{})
-	for _, project := range projects {
-		for _, tag := range project.Tags {
-			tagSet[tag] = struct{}{}
-		}
-	}
-
-	tags := make([]string, 0, len(tagSet))
-	for tag := range tagSet {
-		tags = append(tags, tag)
-	}
-	sort.Strings(tags)
-	return tags
-}
-
-func CollectUniqueGameTags(games []models.Game) []string {
-	tagSet := make(map[string]struct{})
-	for _, game := range games {
-		for _, tag := range game.Tags {
-			tagSet[tag] = struct{}{}
-		}
-	}
-
-	tags := make([]string, 0, len(tagSet))
-	for tag := range tagSet {
-		tags = append(tags, tag)
-	}
-	sort.Strings(tags)
-	return tags
+	return collectUniqueStrings(books, func(b models.Book) []string { return b.Tags })
 }
 
 func CollectUniqueBookGenres(books []models.Book) []string {
-	genreSet := make(map[string]struct{})
-	for _, book := range books {
-		for _, genre := range book.Genres {
-			genreSet[genre] = struct{}{}
-		}
-	}
+	return collectUniqueStrings(books, func(b models.Book) []string { return b.Genres })
+}
 
-	genres := make([]string, 0, len(genreSet))
-	for genre := range genreSet {
-		genres = append(genres, genre)
-	}
-	sort.Strings(genres)
-	return genres
+// Project
+func CollectUniqueProjectTags(projects []models.Project) []string {
+	return collectUniqueStrings(projects, func(p models.Project) []string { return p.Tags })
+}
+
+// Game
+func CollectUniqueGameTags(games []models.Game) []string {
+	return collectUniqueStrings(games, func(g models.Game) []string { return g.Tags })
 }
 
 func CollectUniqueGameGenres(games []models.Game) []string {
-	genreSet := make(map[string]struct{})
-	for _, game := range games {
-		for _, genre := range game.Genres {
-			genreSet[genre] = struct{}{}
-		}
-	}
-
-	genres := make([]string, 0, len(genreSet))
-	for genre := range genreSet {
-		genres = append(genres, genre)
-	}
-	sort.Strings(genres)
-	return genres
+	return collectUniqueStrings(games, func(g models.Game) []string { return g.Genres })
 }
