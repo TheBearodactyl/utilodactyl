@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"utilodactyl/models"
 
 	"github.com/google/go-github/github"
 	"github.com/joho/godotenv"
@@ -44,12 +45,16 @@ func UpdateBooks() error {
 
 	for _, asset := range release.Assets {
 		if asset.GetName() == fileName {
-			fmt.Printf("Found existing asset '%s' with ID %d. Deleting...\n", fileName, asset.GetID())
+			if models.Cli.Verbose {
+				fmt.Printf("Found existing asset '%s' with ID %d. Deleting...\n", fileName, asset.GetID())
+			}
 			_, err := client.Repositories.DeleteReleaseAsset(ctx, owner, repo, asset.GetID())
 			if err != nil {
 				return fmt.Errorf("error deleting existing asset %s (ID: %d): %w", fileName, asset.GetID(), err)
 			}
-			fmt.Println("Asset deleted successfully.")
+			if models.Cli.Verbose {
+				fmt.Println("Asset deleted successfully.")
+			}
 			break
 		}
 	}
@@ -61,7 +66,9 @@ func UpdateBooks() error {
 	}
 	defer file.Close()
 
-	fmt.Printf("Uploading new asset '%s' to release ID %d...\n", fileName, release.GetID())
+	if models.Cli.Verbose {
+		fmt.Printf("Uploading new asset '%s' to release ID %d...\n", fileName, release.GetID())
+	}
 	_, _, err = client.Repositories.UploadReleaseAsset(ctx, owner, repo, release.GetID(), &github.UploadOptions{
 		Name: fileName,
 	}, file)
@@ -69,7 +76,9 @@ func UpdateBooks() error {
 		return fmt.Errorf("error uploading asset: %w", err)
 	}
 
-	fmt.Printf("Upload of '%s' successful to release ID %d.\n", fileName, release.GetID())
+	if models.Cli.Verbose {
+		fmt.Printf("Upload of '%s' successful to release ID %d.\n", fileName, release.GetID())
+	}
 
 	return nil
 }

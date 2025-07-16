@@ -43,3 +43,7 @@ type ItemLink struct {
 	Title string `json:"title"` // The title or description of the link.
 	URL   string `json:"url"`   // The URL of the link.
 }
+
+var Cli struct {
+	Verbose bool `arg:"-v,--verbose" help:"Show advanced logs when updating data"`
+}
