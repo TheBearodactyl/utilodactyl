@@ -4,8 +4,8 @@ package edit
 import (
 	"fmt"
 	"github.com/charmbracelet/huh"
-	"siteutil/models"
-	"siteutil/utils"
+	"utilodactyl/models"
+	"utilodactyl/utils"
 	"strings"
 )
 

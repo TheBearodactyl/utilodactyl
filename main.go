@@ -1,7 +1,7 @@
 package main
 
 import (
-	"siteutil/actions"
+	"utilodactyl/actions"
 )
 
 func main() {

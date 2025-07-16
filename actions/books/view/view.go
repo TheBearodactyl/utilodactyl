@@ -2,7 +2,7 @@ package view
 
 import (
 	"fmt"
-	"siteutil/utils"
+	"utilodactyl/utils"
 	"strings"
 )
 
