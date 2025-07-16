@@ -43,12 +43,7 @@ func AddGame() error {
 		huh.NewInput().
 			Title("Cover Image URL:").
 			Value(&newGame.CoverImage).
-			Validate(func(s string) error {
-				if strings.TrimSpace(s) == "" {
-					return fmt.Errorf("cover image URL cannot be empty")
-				}
-				return nil
-			}),
+			Validate(utils.ValidateURL),
 		huh.NewText().
 			Title("Description:").
 			Value(&newGame.Description).

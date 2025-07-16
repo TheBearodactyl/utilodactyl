@@ -1,10 +1,13 @@
+// Package utils
 package utils
 
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"sort"
+	"strings"
 	"utilodactyl/models"
 )
 
@@ -88,7 +91,6 @@ func GenerateGameID() (uint32, error) {
 	return generateNextID(LoadGames, func(g models.Game) uint32 { return g.ID })
 }
 
-// Common tag/genre collector
 func collectUniqueStrings[T any](items []T, extract func(T) []string) []string {
 	unique := make(map[string]struct{})
 	for _, item := range items {
@@ -104,7 +106,6 @@ func collectUniqueStrings[T any](items []T, extract func(T) []string) []string {
 	return result
 }
 
-// Book
 func CollectUniqueBookTags(books []models.Book) []string {
 	return collectUniqueStrings(books, func(b models.Book) []string { return b.Tags })
 }
@@ -113,16 +114,29 @@ func CollectUniqueBookGenres(books []models.Book) []string {
 	return collectUniqueStrings(books, func(b models.Book) []string { return b.Genres })
 }
 
-// Project
 func CollectUniqueProjectTags(projects []models.Project) []string {
 	return collectUniqueStrings(projects, func(p models.Project) []string { return p.Tags })
 }
 
-// Game
 func CollectUniqueGameTags(games []models.Game) []string {
 	return collectUniqueStrings(games, func(g models.Game) []string { return g.Tags })
 }
 
 func CollectUniqueGameGenres(games []models.Game) []string {
 	return collectUniqueStrings(games, func(g models.Game) []string { return g.Genres })
+}
+
+func ValidateURL(input string) error {
+	input = strings.TrimSpace(input)
+	
+	if input == "" {
+		return fmt.Errorf("url cannot be empty")
+	}
+
+	u, err := url.ParseRequestURI(input)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		return fmt.Errorf("invalid url format")
+	}
+
+	return nil
 }

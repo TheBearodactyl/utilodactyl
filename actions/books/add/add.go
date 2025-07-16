@@ -1,3 +1,4 @@
+// Package add
 package add
 
 import (
@@ -44,12 +45,7 @@ func AddBook() error {
 		huh.NewInput().
 			Title("Cover Image URL:").
 			Value(&newBook.CoverImage).
-			Validate(func(s string) error {
-				if strings.TrimSpace(s) == "" {
-					return fmt.Errorf("cover image URL cannot be empty")
-				}
-				return nil
-			}),
+			Validate(utils.ValidateURL),
 		huh.NewText().
 			Title("Description:").
 			Value(&newBook.Description).
@@ -129,11 +125,11 @@ func AddBook() error {
 func handleGenres(existingBooks []models.Book, book *models.Book) error {
 	existingGenres := utils.CollectUniqueBookGenres(existingBooks)
 	if len(existingGenres) > 0 {
-		// Allow selecting multiple existing genres.
 		err := huh.NewMultiSelect[string]().
 			Title("Select existing genres:").
 			Options(huh.NewOptions(existingGenres...)...).
 			Value(&book.Genres).
+			Height(10).
 			Run()
 		if err != nil {
 			return err
@@ -190,6 +186,7 @@ func handleTags(existingBooks []models.Book, book *models.Book) error {
 			Title("Select existing tags:").
 			Options(huh.NewOptions(existingTags...)...).
 			Value(&book.Tags).
+			Height(10).
 			Run()
 		if err != nil {
 			return err

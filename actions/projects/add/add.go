@@ -1,11 +1,13 @@
+// Package add
 package add
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
+
+	"github.com/charmbracelet/huh"
 )
 
 func AddProject() error {
@@ -30,12 +32,7 @@ func AddProject() error {
 			}
 			return nil
 		}),
-		huh.NewInput().Title("Source:").Value(&newProject.Source).Validate(func(s string) error {
-			if strings.TrimSpace(s) == "" {
-				return fmt.Errorf("source is empty")
-			}
-			return nil
-		}),
+		huh.NewInput().Title("Source:").Value(&newProject.Source).Validate(utils.ValidateURL),
 	)
 
 	if err = huh.NewForm(basicDetailsGroup).Run(); err != nil {
