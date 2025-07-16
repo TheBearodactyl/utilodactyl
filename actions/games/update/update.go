@@ -19,9 +19,14 @@ const (
 )
 
 func UpdateGames() error {
-	err := godotenv.Load()
-	if err != nil {
-		return fmt.Errorf("error loading .env file: %w", err)
+	if err := godotenv.Load(); err != nil {
+		if os.IsNotExist(err) {
+			if models.Cli.Verbose {
+				fmt.Println(".env file not found. Falling back to system environment variables.")
+			}
+		} else {
+			return fmt.Errorf("error loading .env file: %w", err)
+		}
 	}
 
 	token := os.Getenv("GITHUB_TOKEN")
