@@ -1,4 +1,4 @@
-module siteutil
+module utilodactyl
 
 go 1.23.0
 
