@@ -1,0 +1,32 @@
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Binaries for other OS/architectures
+bin/
+out/
+build/
+
+# Go module cache
+.go/
+pkg/mod/
+
+# Test cache
+.test/
+
+# Vendor directory (if not using Go Modules or explicitly excluded)
+vendor/
+
+# Environment files
+.env
+.env.*
+
+# Editor-specific files
+.idea/
+.vscode/
+*.swp
+*~
+
+# Project specific files
+*.json
