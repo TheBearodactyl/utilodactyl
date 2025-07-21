@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"utilodactyl/models"
 
 	"github.com/google/go-github/github"
 	"github.com/joho/godotenv"
@@ -20,15 +21,19 @@ const (
 )
 
 func PullGames() error {
-	if _, err := os.Stat(".env"); err != nil {
-		if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil {
+		if os.IsNotExist(err) {
+			if models.Cli.Verbose {
+				fmt.Println(".env file not found. Falling back to system environment variables.")
+			}
+		} else {
 			return fmt.Errorf("error loading .env file: %w", err)
 		}
 	}
 
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		return fmt.Errorf("GITHUB_TOKEN not set in .env or environment")
+		return fmt.Errorf("missing GITHUB_TOKEN environment variable")
 	}
 
 	ctx := context.Background()
