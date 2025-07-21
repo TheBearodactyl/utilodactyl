@@ -20,8 +20,10 @@ const (
 )
 
 func PullProjects() error {
-	if err := godotenv.Load(); err != nil {
-		return fmt.Errorf("error loading .env file: %w", err)
+	if _, err := os.Stat(".env"); err != nil {
+		if err := godotenv.Load(); err != nil {
+			return fmt.Errorf("error loading .env file: %w", err)
+		}
 	}
 
 	token := os.Getenv("GITHUB_TOKEN")
