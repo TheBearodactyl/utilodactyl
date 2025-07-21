@@ -33,6 +33,7 @@ func AddProject() error {
 			return nil
 		}),
 		huh.NewInput().Title("Source:").Value(&newProject.Source).Validate(utils.ValidateURL),
+		huh.NewInput().Title("Install Command:").Value(&newProject.InstallCommand),
 	)
 
 	if err = huh.NewForm(basicDetailsGroup).Run(); err != nil {

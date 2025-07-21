@@ -6,7 +6,7 @@ type Book struct {
 	Title       string     `json:"title"`       // The title of the book.
 	Author      string     `json:"author"`      // The author of the book.
 	Genres      []string   `json:"genres"`      // A list of genres the book belongs to.
-	Rating      uint8      `json:"rating"`      // User rating for the book (1-5).
+	Rating      uint16     `json:"rating"`      // User rating for the book (1-5).
 	CoverImage  string     `json:"coverImage"`  // URL or path to the book's cover image.
 	Description string     `json:"description"` // A brief description of the book.
 	MyThoughts  string     `json:"myThoughts"`  // User's personal thoughts or review on the book.
@@ -14,7 +14,6 @@ type Book struct {
 	Links       []ItemLink `json:"links"`       // Relevant links for the book (e.g., purchase, review).
 	Status      string     `json:"status"`      // Current reading status (e.g., "Reading", "Finished").
 	Explicit    bool       `json:"explicit"`    // Indicates if the book contains explicit content.
-
 }
 
 type Game struct {
@@ -23,7 +22,7 @@ type Game struct {
 	Developer   string     `json:"developer"`
 	Genres      []string   `json:"genres"`
 	Tags        []string   `json:"tags"`
-	Rating      uint8      `json:"rating"`
+	Rating      uint16     `json:"rating"`
 	Status      string     `json:"status"`
 	Description string     `json:"description"`
 	MyThoughts  string     `json:"myThoughts"`
@@ -33,10 +32,11 @@ type Game struct {
 }
 
 type Project struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Tags        []string `json:"tags"`
-	Source      string   `json:"source"`
+	Name           string   `json:"name"`
+	Description    string   `json:"description"`
+	Tags           []string `json:"tags"`
+	Source         string   `json:"source"`
+	InstallCommand string   `json:"installCommand"`
 }
 
 type ItemLink struct {

@@ -2,10 +2,11 @@ package edit
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
+
+	"github.com/charmbracelet/huh"
 )
 
 // EditBook allows the user to select an existing book and modify its details.
@@ -133,8 +134,8 @@ func EditBook() error {
 		return fmt.Errorf("form input error for book details: %w", err)
 	}
 
-	bookToEdit.Rating = uint8(rating) // Update the book's rating.
-	bookToEdit.Status = status        // Update the book's status.
+	bookToEdit.Rating = uint16(rating) // Update the book's rating.
+	bookToEdit.Status = status         // Update the book's status.
 
 	// Handle genre modifications.
 	if err = editGenres(books, bookToEdit); err != nil {

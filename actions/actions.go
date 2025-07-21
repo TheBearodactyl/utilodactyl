@@ -3,24 +3,29 @@ package actions
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
 	bookadd "utilodactyl/actions/books/add"
 	bookedit "utilodactyl/actions/books/edit"
+	bookpull "utilodactyl/actions/books/pull"
 	bookupdate "utilodactyl/actions/books/update"
 	bookview "utilodactyl/actions/books/view"
 	gameadd "utilodactyl/actions/games/add"
 	gameedit "utilodactyl/actions/games/edit"
+	gamepull "utilodactyl/actions/games/pull"
 	gameupdate "utilodactyl/actions/games/update"
 	gameview "utilodactyl/actions/games/view"
 	projectadd "utilodactyl/actions/projects/add"
 	projectedit "utilodactyl/actions/projects/edit"
+	projectpull "utilodactyl/actions/projects/pull"
 	projectupdate "utilodactyl/actions/projects/update"
 	projectview "utilodactyl/actions/projects/view"
+
+	"github.com/charmbracelet/huh"
 )
 
 type AppAction string
 
 const (
+	PullAll        AppAction = "Get the latest releases"
 	Books          AppAction = "Operate on `books.json`"
 	Projects       AppAction = "Operate on `projects.json`"
 	Games          AppAction = "Operate on `games.json`"
@@ -36,6 +41,9 @@ const (
 	UpdateBooks    AppAction = "Update the `books.json` release"
 	UpdateProjects AppAction = "Update the `projects.json` release"
 	UpdateGames    AppAction = "Update the `games.json` release"
+	PullBooks      AppAction = "Pull the latest `books.json` release"
+	PullGames      AppAction = "Pull the latest `games.json` release"
+	PullProjects   AppAction = "Pull the latest `projects.json` release"
 	ExitApp        AppAction = "Exit"
 )
 
@@ -48,14 +56,24 @@ func App() error {
 				huh.NewOption(string(Books), Books),
 				huh.NewOption(string(Projects), Projects),
 				huh.NewOption(string(Games), Games),
+				huh.NewOption(string(PullAll), PullAll),
 			).
 			Value(&action).Run()
-
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 
 		switch action {
+		case PullAll:
+			if err := bookpull.PullBooks(); err != nil {
+				fmt.Printf("Error pulling books.json: %v\n", err)
+			}
+			if err := projectpull.PullProjects(); err != nil {
+				fmt.Printf("Error pulling projects.json: %v\n", err)
+			}
+			if err := gamepull.PullGames(); err != nil {
+				fmt.Printf("Error pulling games.json: %v\n", err)
+			}
 		case Books:
 			var bookAction AppAction
 			err := huh.NewSelect[AppAction]().
@@ -64,12 +82,12 @@ func App() error {
 					huh.NewOption(string(AddBook), AddBook),
 					huh.NewOption(string(ViewBooks), ViewBooks),
 					huh.NewOption(string(EditBook), EditBook),
+					huh.NewOption(string(PullBooks), PullBooks),
 					huh.NewOption(string(UpdateBooks), UpdateBooks),
 					huh.NewOption(string(ExitApp), ExitApp),
 				).
 				Value(&bookAction).
 				Run()
-
 			if err != nil {
 				return fmt.Errorf("%w", err)
 			}
@@ -91,6 +109,10 @@ func App() error {
 				if err := bookupdate.UpdateBooks(); err != nil {
 					fmt.Printf("Error updating books: %v\n", err)
 				}
+			case PullBooks:
+				if err := bookpull.PullBooks(); err != nil {
+					fmt.Printf("Error pulling books.json: %v\n", err)
+				}
 			}
 		case Projects:
 			var projectAction AppAction
@@ -101,10 +123,10 @@ func App() error {
 					huh.NewOption(string(EditProject), EditProject),
 					huh.NewOption(string(ViewProject), ViewProject),
 					huh.NewOption(string(UpdateProjects), UpdateProjects),
+					huh.NewOption(string(PullProjects), PullProjects),
 				).
 				Value(&projectAction).
 				Run()
-
 			if err != nil {
 				return fmt.Errorf("%w", err)
 			}
@@ -126,6 +148,10 @@ func App() error {
 				if err := projectupdate.UpdateProjects(); err != nil {
 					fmt.Printf("Error updating projects: %v\n", err)
 				}
+			case PullProjects:
+				if err := projectpull.PullProjects(); err != nil {
+					fmt.Printf("Error pulling projects.json: %v\n", err)
+				}
 			}
 		case Games:
 			var gamesAction AppAction
@@ -134,12 +160,12 @@ func App() error {
 				Options(
 					huh.NewOption(string(AddGame), AddGame),
 					huh.NewOption(string(EditGame), EditGame),
+					huh.NewOption(string(PullGames), PullGames),
 					huh.NewOption(string(UpdateGames), UpdateGames),
 					huh.NewOption(string(ViewGames), ViewGames),
 				).
 				Value(&gamesAction).
 				Run()
-
 			if err != nil {
 				return fmt.Errorf("%w", err)
 			}
@@ -160,6 +186,10 @@ func App() error {
 			case ViewGames:
 				if err := gameview.ViewGames(); err != nil {
 					fmt.Printf("Error viewing games: %v\n", err)
+				}
+			case PullGames:
+				if err := gamepull.PullGames(); err != nil {
+					fmt.Printf("Error pulling games.json: %v\n", err)
 				}
 			}
 		}

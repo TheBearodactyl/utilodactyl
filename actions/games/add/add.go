@@ -2,14 +2,15 @@ package add
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
+
+	"github.com/charmbracelet/huh"
 )
 
 func AddGame() error {
-	books, err := utils.LoadGames()
+	games, err := utils.LoadGames()
 	if err != nil {
 		return fmt.Errorf("failed to load books: %v", err)
 	}
@@ -90,15 +91,11 @@ func AddGame() error {
 		return fmt.Errorf("form input error for basic game details: %w", err)
 	}
 
-	newGame.Rating = uint8(rating)
+	newGame.Rating = uint16(rating)
 	newGame.Status = status
 
-	if err = handleGenres(books, &newGame); err != nil {
-		return fmt.Errorf("error handling book genres: %w", err)
-	}
-
-	if err = handleTags(books, &newGame); err != nil {
-		return fmt.Errorf("error handling book tags: %w", err)
+	if err = handleGenresAndTagsForm(games, &newGame); err != nil {
+		return fmt.Errorf("error handling book genres and tags: %w", err)
 	}
 
 	if err = handleLinks(&newGame); err != nil {
@@ -110,126 +107,120 @@ func AddGame() error {
 		return fmt.Errorf("failed to generate unique game ID: %w", err)
 	}
 
-	books = append(books, newGame)
+	games = append(games, newGame)
 
-	if err = utils.SaveGames(books); err != nil {
+	if err = utils.SaveGames(games); err != nil {
 		return fmt.Errorf("failed to save games after adding new entry: %w", err)
 	}
 
-	fmt.Println("✅. Game added successfully!")
+	fmt.Println("✅ Game added successfully!")
 	return nil
 }
 
-func handleGenres(existingBooks []models.Game, book *models.Game) error {
-	existingGenres := utils.CollectUniqueGameGenres(existingBooks)
-	if len(existingGenres) > 0 {
-		// Allow selecting multiple existing genres.
-		err := huh.NewMultiSelect[string]().
-			Title("Select existing genres:").
-			Options(huh.NewOptions(existingGenres...)...).
-			Value(&book.Genres).
-			Run()
-		if err != nil {
-			return err
-		}
-	}
+func handleGenresAndTagsForm(existingGames []models.Game, game *models.Game) error {
+	existingGenres := utils.CollectUniqueGameGenres(existingGames)
+	existingTags := utils.CollectUniqueGameTags(existingGames)
 
-	var confirmAddGenre bool
-	err := huh.NewConfirm().
-		Title("Add custom genres?").
-		Value(&confirmAddGenre).
-		Run()
-	if err != nil {
+	var selectedGenres []string
+	var selectedTags []string
+	var addCustomGenres bool
+	var addCustomTags bool
+	var customGenres []string
+	var customTags []string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewMultiSelect[string]().
+				Title("Select existing genres:").
+				Options(huh.NewOptions(existingGenres...)...).
+				Value(&selectedGenres).
+				WithHeight(10),
+
+			huh.NewConfirm().
+				Title("Add custom genres?").
+				Value(&addCustomGenres),
+
+			huh.NewMultiSelect[string]().
+				Title("Select existing tags:").
+				Options(huh.NewOptions(existingTags...)...).
+				Value(&selectedTags).
+				WithHeight(10),
+
+			huh.NewConfirm().
+				Title("Add custom tags?").
+				Value(&addCustomTags),
+		),
+	)
+
+	if err := form.Run(); err != nil {
 		return err
 	}
 
-	if confirmAddGenre {
+	game.Genres = append(game.Genres, selectedGenres...)
+	game.Tags = append(game.Tags, selectedTags...)
+
+	if addCustomGenres {
 		for {
-			var customGenre string
-			err = huh.NewInput().
+			var genre string
+			if err := huh.NewInput().
 				Title("New genre:").
-				Value(&customGenre).
+				Value(&genre).
 				Validate(func(s string) error {
 					if strings.TrimSpace(s) == "" {
 						return fmt.Errorf("genre cannot be empty")
 					}
 					return nil
 				}).
-				Run()
-			if err != nil {
+				Run(); err != nil {
 				return err
 			}
-			book.Genres = append(book.Genres, customGenre)
+			customGenres = append(customGenres, genre)
 
-			var addAnother bool
-			err = huh.NewConfirm().
+			var more bool
+			if err := huh.NewConfirm().
 				Title("Add another genre?").
-				Value(&addAnother).
-				Run()
-			if err != nil {
+				Value(&more).
+				Run(); err != nil {
 				return err
 			}
-			if !addAnother {
+			if !more {
 				break
 			}
 		}
-	}
-	return nil
-}
-
-func handleTags(existingGames []models.Game, game *models.Game) error {
-	existingTags := utils.CollectUniqueGameTags(existingGames)
-	if len(existingTags) > 0 {
-		err := huh.NewMultiSelect[string]().
-			Title("Select existing tags:").
-			Options(huh.NewOptions(existingTags...)...).
-			Value(&game.Tags).
-			Run()
-		if err != nil {
-			return err
-		}
+		game.Genres = append(game.Genres, customGenres...)
 	}
 
-	var confirmAddTag bool
-	err := huh.NewConfirm().
-		Title("Add custom tags?").
-		Value(&confirmAddTag).
-		Run()
-	if err != nil {
-		return err
-	}
-
-	if confirmAddTag {
+	if addCustomTags {
 		for {
-			var customTag string
-			err = huh.NewInput().
+			var tag string
+			if err := huh.NewInput().
 				Title("New tag:").
-				Value(&customTag).
+				Value(&tag).
 				Validate(func(s string) error {
 					if strings.TrimSpace(s) == "" {
 						return fmt.Errorf("tag cannot be empty")
 					}
 					return nil
 				}).
-				Run()
-			if err != nil {
+				Run(); err != nil {
 				return err
 			}
-			game.Tags = append(game.Tags, customTag)
+			customTags = append(customTags, tag)
 
-			var addAnother bool
-			err = huh.NewConfirm().
+			var more bool
+			if err := huh.NewConfirm().
 				Title("Add another tag?").
-				Value(&addAnother).
-				Run()
-			if err != nil {
+				Value(&more).
+				Run(); err != nil {
 				return err
 			}
-			if !addAnother {
+			if !more {
 				break
 			}
 		}
+		game.Tags = append(game.Tags, customTags...)
 	}
+
 	return nil
 }
 

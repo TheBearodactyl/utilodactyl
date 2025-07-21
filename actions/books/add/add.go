@@ -92,7 +92,7 @@ func AddBook() error {
 		return fmt.Errorf("form input error for basic book details: %w", err)
 	}
 
-	newBook.Rating = uint8(rating)
+	newBook.Rating = uint16(rating)
 	newBook.Status = status
 
 	if err = handleGenres(books, &newBook); err != nil {

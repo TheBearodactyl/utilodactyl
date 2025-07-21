@@ -3,10 +3,11 @@ package edit
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
+
+	"github.com/charmbracelet/huh"
 )
 
 func EditProject() error {
@@ -30,7 +31,6 @@ func EditProject() error {
 		Options(huh.NewOptions(projectNames...)...).
 		Value(&selectedName).
 		Run()
-
 	if err != nil {
 		return fmt.Errorf("error loading projects: %v", err)
 	}
@@ -64,6 +64,12 @@ func EditProject() error {
 			huh.NewInput().Title("Source Repo:").Value(&projToEdit.Source).Validate(func(s string) error {
 				if strings.TrimSpace(s) == "" {
 					return fmt.Errorf("source repo cannot be empty")
+				}
+				return nil
+			}),
+			huh.NewInput().Title("Install Command:").Value(&projToEdit.InstallCommand).Validate(func(s string) error {
+				if strings.TrimSpace(s) == "" {
+					return fmt.Errorf("install command cannot be empty")
 				}
 				return nil
 			}),

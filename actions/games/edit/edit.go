@@ -2,9 +2,9 @@ package edit
 
 import (
 	"fmt"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
 
 	"github.com/charmbracelet/huh"
 )
@@ -63,7 +63,7 @@ func EditGame() error {
 					return nil
 				}),
 			huh.NewInput().
-				Title("Author:").
+				Title("Developer:").
 				Value(&gameToEdit.Developer).
 				Validate(func(s string) error {
 					if strings.TrimSpace(s) == "" {
@@ -112,11 +112,11 @@ func EditGame() error {
 				).
 				Value(&rating),
 			huh.NewSelect[string]().
-				Title("Reading Status:").
+				Title("Play Status:").
 				Options(
-					huh.NewOption("Reading", "Reading"),
+					huh.NewOption("Playing", "Playing"),
 					huh.NewOption("Finished", "Finished"),
-					huh.NewOption("Plan to Read", "Plan to Read"),
+					huh.NewOption("Plan to Play", "Plan to Play"),
 					huh.NewOption("Dropped", "Dropped"),
 				).
 				Value(&status),
@@ -127,7 +127,7 @@ func EditGame() error {
 		return fmt.Errorf("form input error for game details: %w", err)
 	}
 
-	gameToEdit.Rating = uint8(rating)
+	gameToEdit.Rating = uint16(rating)
 	gameToEdit.Status = status
 
 	if err = editGenres(games, gameToEdit); err != nil {

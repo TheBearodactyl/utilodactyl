@@ -20,6 +20,7 @@ func ViewProjects() error {
 			fmt.Printf("\nDescription: %s\n", project.Description)
 			fmt.Printf("\nTags: %v\n", joinStringSlice(project.Tags, ", "))
 			fmt.Printf("\nSource Repo: %s\n", project.Source)
+			fmt.Printf("\nInstall Command: %s\n", project.InstallCommand)
 		}
 	}
 
