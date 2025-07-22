@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"utilodactyl/models"
@@ -149,6 +150,23 @@ func ValidateURL(input string) error {
 	u, err := url.ParseRequestURI(input)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
 		return fmt.Errorf("invalid url format")
+	}
+
+	return nil
+}
+
+func IsColorCode(str string) bool {
+	match, err := regexp.MatchString("^#?[0-9A-Fa-f]{6}$", str)
+	if err != nil {
+		return false
+	}
+
+	return match
+}
+
+func ValidateColor(s string) error {
+	if !IsColorCode(s) {
+		return fmt.Errorf("string is not a valid hex code")
 	}
 
 	return nil

@@ -3,10 +3,11 @@ package add
 
 import (
 	"fmt"
-	"github.com/charmbracelet/huh"
+	"strings"
 	"utilodactyl/models"
 	"utilodactyl/utils"
-	"strings"
+
+	"github.com/charmbracelet/huh"
 )
 
 func AddBook() error {
@@ -86,6 +87,16 @@ func AddBook() error {
 				huh.NewOption("Dropped", "Dropped"),
 			).
 			Value(&status),
+		huh.NewInput().
+			Title("Border Color:").
+			Value(&newBook.Color).
+			Validate(func(s string) error {
+				if !utils.IsColorCode(s) {
+					return fmt.Errorf("string is not a valid color code")
+				}
+
+				return nil
+			}),
 	)
 
 	if err = huh.NewForm(basicDetailsGroup).Run(); err != nil {

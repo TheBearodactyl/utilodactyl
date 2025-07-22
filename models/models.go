@@ -14,6 +14,7 @@ type Book struct {
 	Links       []ItemLink `json:"links"`       // Relevant links for the book (e.g., purchase, review).
 	Status      string     `json:"status"`      // Current reading status (e.g., "Reading", "Finished").
 	Explicit    bool       `json:"explicit"`    // Indicates if the book contains explicit content.
+	Color       string     `json:"color"`
 }
 
 type Game struct {

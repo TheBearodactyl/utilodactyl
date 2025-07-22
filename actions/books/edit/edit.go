@@ -126,6 +126,10 @@ func EditBook() error {
 					huh.NewOption("Dropped", "Dropped"),
 				).
 				Value(&status),
+			huh.NewInput().
+				Title("Border Color:").
+				Value(&bookToEdit.Color).
+				Validate(utils.ValidateColor),
 		),
 	)
 
