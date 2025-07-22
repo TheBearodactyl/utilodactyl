@@ -39,6 +39,13 @@ type Project struct {
 	InstallCommand string   `json:"installCommand"`
 }
 
+type Review struct {
+	Chapter     uint32 `json:"chapter"`
+	Description string `json:"description"`
+	Rating      uint8  `json:"rating"`
+	Thoughts    string `json:"thoughts"`
+}
+
 type ItemLink struct {
 	Title string `json:"title"` // The title or description of the link.
 	URL   string `json:"url"`   // The URL of the link.

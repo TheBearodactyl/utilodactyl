@@ -15,6 +15,7 @@ const (
 	booksFile    = "books.json"
 	projectsFile = "projects.json"
 	gamesFile    = "games.json"
+	reviewsFile  = "reviews.json"
 )
 
 func readJSONFile[T any](path string) ([]T, error) {
@@ -56,6 +57,10 @@ func LoadProjects() ([]models.Project, error) {
 	return readJSONFile[models.Project](projectsFile)
 }
 
+func LoadReviews() ([]models.Review, error) {
+	return readJSONFile[models.Review](reviewsFile)
+}
+
 func SaveBooks(books []models.Book) error {
 	return writeJSONFile(booksFile, books)
 }
@@ -66,6 +71,10 @@ func SaveGames(games []models.Game) error {
 
 func SaveProjects(projects []models.Project) error {
 	return writeJSONFile(projectsFile, projects)
+}
+
+func SaveReviews(reviews []models.Review) error {
+	return writeJSONFile(reviewsFile, reviews)
 }
 
 func generateNextID[T any](loadFunc func() ([]T, error), getID func(T) uint32) (uint32, error) {
@@ -89,6 +98,10 @@ func GenerateBookID() (uint32, error) {
 
 func GenerateGameID() (uint32, error) {
 	return generateNextID(LoadGames, func(g models.Game) uint32 { return g.ID })
+}
+
+func GenerateReviewID() (uint32, error) {
+	return generateNextID(LoadReviews, func(r models.Review) uint32 { return r.Chapter })
 }
 
 func collectUniqueStrings[T any](items []T, extract func(T) []string) []string {
@@ -128,7 +141,7 @@ func CollectUniqueGameGenres(games []models.Game) []string {
 
 func ValidateURL(input string) error {
 	input = strings.TrimSpace(input)
-	
+
 	if input == "" {
 		return fmt.Errorf("url cannot be empty")
 	}

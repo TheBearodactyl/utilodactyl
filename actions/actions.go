@@ -18,6 +18,11 @@ import (
 	projectpull "utilodactyl/actions/projects/pull"
 	projectupdate "utilodactyl/actions/projects/update"
 	projectview "utilodactyl/actions/projects/view"
+	reviewadd "utilodactyl/actions/reviews/add"
+	reviewedit "utilodactyl/actions/reviews/edit"
+	reviewpull "utilodactyl/actions/reviews/pull"
+	reviewupdate "utilodactyl/actions/reviews/update"
+	reviewview "utilodactyl/actions/reviews/view"
 
 	"github.com/charmbracelet/huh"
 )
@@ -29,21 +34,27 @@ const (
 	Books          AppAction = "Operate on `books.json`"
 	Projects       AppAction = "Operate on `projects.json`"
 	Games          AppAction = "Operate on `games.json`"
+	Reviews        AppAction = "Operate on `reviews.json`"
 	AddBook        AppAction = "Add a new book"
 	AddProject     AppAction = "Add a new project"
 	AddGame        AppAction = "Add a new game"
+	AddReview      AppAction = "Add a new Chapter Review"
 	ViewBooks      AppAction = "View existing books"
 	ViewProject    AppAction = "View existing projects"
 	ViewGames      AppAction = "View existing games"
+	ViewReviews    AppAction = "View existing reviews"
 	EditBook       AppAction = "Edit a book"
 	EditProject    AppAction = "Edit a project"
 	EditGame       AppAction = "Edit a game"
+	EditReview     AppAction = "Edit a review"
 	UpdateBooks    AppAction = "Update the `books.json` release"
 	UpdateProjects AppAction = "Update the `projects.json` release"
 	UpdateGames    AppAction = "Update the `games.json` release"
+	UpdateReviews  AppAction = "Update the `reviews.json` release"
 	PullBooks      AppAction = "Pull the latest `books.json` release"
 	PullGames      AppAction = "Pull the latest `games.json` release"
 	PullProjects   AppAction = "Pull the latest `projects.json` release"
+	PullReviews    AppAction = "Pull the latest `reviews.json` release"
 	ExitApp        AppAction = "Exit"
 )
 
@@ -56,6 +67,7 @@ func App() error {
 				huh.NewOption(string(Books), Books),
 				huh.NewOption(string(Projects), Projects),
 				huh.NewOption(string(Games), Games),
+				huh.NewOption(string(Reviews), Reviews),
 				huh.NewOption(string(PullAll), PullAll),
 			).
 			Value(&action).Run()
@@ -73,6 +85,9 @@ func App() error {
 			}
 			if err := gamepull.PullGames(); err != nil {
 				fmt.Printf("Error pulling games.json: %v\n", err)
+			}
+			if err := reviewpull.PullReviews(); err != nil {
+				fmt.Printf("Error pulling reviews.json: %v\n", err)
 			}
 		case Books:
 			var bookAction AppAction
@@ -192,6 +207,47 @@ func App() error {
 					fmt.Printf("Error pulling games.json: %v\n", err)
 				}
 			}
+		case Reviews:
+			var reviewAction AppAction
+			err := huh.NewSelect[AppAction]().
+				Title("What would you like to do?").
+				Options(
+					huh.NewOption(string(AddReview), AddReview),
+					huh.NewOption(string(EditReview), EditReview),
+					huh.NewOption(string(PullReviews), PullReviews),
+					huh.NewOption(string(UpdateReviews), UpdateReviews),
+					huh.NewOption(string(ViewReviews), ViewReviews),
+				).
+				Value(&reviewAction).
+				Run()
+			if err != nil {
+				return fmt.Errorf("%w", err)
+			}
+
+			switch reviewAction {
+			case AddReview:
+				if err := reviewadd.AddReview(); err != nil {
+					fmt.Printf("Error adding review: %v\n", err)
+				}
+			case EditReview:
+				if err := reviewedit.EditReview(); err != nil {
+					fmt.Printf("Error editing review: %v\n", err)
+				}
+			case UpdateReviews:
+				if err := reviewupdate.UpdateReviews(); err != nil {
+					fmt.Printf("Error updating review: %v\n", err)
+				}
+			case ViewReviews:
+				if err := reviewview.ViewReviews(); err != nil {
+					fmt.Printf("Error viewing review: %v\n", err)
+				}
+			case PullReviews:
+				if err := reviewpull.PullReviews(); err != nil {
+					fmt.Printf("Error pulling reviews.json: %v\n", err)
+				}
+			}
+
 		}
+
 	}
 }
