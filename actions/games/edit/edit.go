@@ -20,7 +20,6 @@ func EditGame() error {
 		return nil
 	}
 
-	// Prepare options for selecting a book by title.
 	gameTitles := make([]string, len(games))
 	for i, b := range games {
 		gameTitles[i] = b.Title
@@ -119,7 +118,12 @@ func EditGame() error {
 					huh.NewOption("Plan to Play", "Plan to Play"),
 					huh.NewOption("Dropped", "Dropped"),
 				).
-				Value(&status),
+				Value(&gameToEdit.Status),
+			huh.NewSelect[uint32]().
+				Title("Progression Percentage:").
+				Options(utils.GenPercentOpts()...).
+				Inline(true).
+				Value(&gameToEdit.Percent),
 		),
 	)
 
@@ -127,7 +131,12 @@ func EditGame() error {
 		return fmt.Errorf("form input error for game details: %w", err)
 	}
 
-	gameToEdit.Rating = uint16(rating)
+	if (gameToEdit.Title == "P5R") {
+		gameToEdit.Rating = 500
+	} else {
+		gameToEdit.Rating = uint32(rating)
+	}
+	gameToEdit.Rating = uint32(rating)
 	gameToEdit.Status = status
 
 	if err = editGenres(games, gameToEdit); err != nil {

@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"utilodactyl/models"
+
+	"github.com/charmbracelet/huh"
 )
 
 const (
@@ -170,4 +172,15 @@ func ValidateColor(s string) error {
 	}
 
 	return nil
+}
+
+func GenPercentOpts() []huh.Option[uint32] {
+	options := make([]huh.Option[uint32], 0, 100)
+
+	for i := 1; i <= 100; i++ {
+		option := huh.NewOption(fmt.Sprintf("%d", i), uint32(i))
+		options = append(options, option)
+	}
+
+	return options
 }

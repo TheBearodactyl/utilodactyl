@@ -16,20 +16,21 @@ func ViewGames() error {
 		fmt.Println("No games to show.")
 	} else {
 		for _, game := range games {
-			fmt.Printf("\n📖 %s by %s\n", game.Title, game.Developer)
-			fmt.Printf("⭐ Rating: %d\n", game.Rating)
-			fmt.Printf("📚 Genres: %s\n", joinStringSlice(game.Genres, ", "))
-			fmt.Printf("🏷️ Tags: %s\n", joinStringSlice(game.Tags, ", "))
-			fmt.Printf("📄 Description: %s\n", game.Description)
-			fmt.Printf("💭 Thoughts: %s\n", game.MyThoughts)
-			fmt.Printf("📈 Status: %s\n", game.Status)
+			fmt.Printf("\n%s by %s\n", game.Title, game.Developer)
+			fmt.Printf("Rating: %d\n", game.Rating)
+			fmt.Printf("Genres: %s\n", joinStringSlice(game.Genres, ", "))
+			fmt.Printf("Tags: %s\n", joinStringSlice(game.Tags, ", "))
+			fmt.Printf("Description: %s\n", game.Description)
+			fmt.Printf("Thoughts: %s\n", game.MyThoughts)
+			fmt.Printf("Status: %s\n", game.Status)
+			fmt.Printf("Progression: %d\n", game.Percent)
 			if game.Explicit {
-				fmt.Println("🔞 Explicit Content: Yes")
+				fmt.Println("Explicit Content: Yes")
 			} else {
-				fmt.Println("✅ Explicit Content: No")
+				fmt.Println("Explicit Content: No")
 			}
 			if len(game.Links) > 0 {
-				fmt.Println("🔗 Links:")
+				fmt.Println("Links:")
 				for _, link := range game.Links {
 					fmt.Printf("  • %s → %s\n", link.Title, link.URL)
 				}

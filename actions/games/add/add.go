@@ -1,3 +1,4 @@
+// Package add
 package add
 
 import (
@@ -85,13 +86,18 @@ func AddGame() error {
 				huh.NewOption("Dropped", "Dropped"),
 			).
 			Value(&status),
+		huh.NewSelect[uint32]().
+			Title("Progression Percentage:").
+			Options(utils.GenPercentOpts()...).
+			Inline(true).
+			Value(&newGame.Percent),
 	)
 
 	if err = huh.NewForm(basicDetailsGroup).Run(); err != nil {
 		return fmt.Errorf("form input error for basic game details: %w", err)
 	}
 
-	newGame.Rating = uint16(rating)
+	newGame.Rating = uint32(rating)
 	newGame.Status = status
 
 	if err = handleGenresAndTagsForm(games, &newGame); err != nil {

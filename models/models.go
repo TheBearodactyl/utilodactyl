@@ -23,13 +23,14 @@ type Game struct {
 	Developer   string     `json:"developer"`
 	Genres      []string   `json:"genres"`
 	Tags        []string   `json:"tags"`
-	Rating      uint16     `json:"rating"`
+	Rating      uint32     `json:"rating"`
 	Status      string     `json:"status"`
 	Description string     `json:"description"`
 	MyThoughts  string     `json:"myThoughts"`
 	Links       []ItemLink `json:"links"`
 	Explicit    bool       `json:"explicit"`
 	CoverImage  string     `json:"coverImage"`
+	Percent     uint32     `json:"percent"`
 }
 
 type Project struct {
